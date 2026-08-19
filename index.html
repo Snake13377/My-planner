@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Chores & Habits Planner</title>
   
-  <!-- Web App Manifest Link -->
   <link rel="manifest" href="manifest.json">
-  <!-- System / Navigation bar set to black -->
   <meta name="theme-color" content="#000000">
 
   <style>
@@ -39,54 +37,82 @@
 
     header { 
       text-align: center; 
-      margin-bottom: 20px; 
-      padding: 14px;
+      margin-bottom: 16px; 
+      padding: 16px;
       background: var(--accent-black);
       color: white;
       border-radius: 16px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    h1 { 
-      font-size: 1.3rem; 
-      font-weight: 700;
-      letter-spacing: 0.5px; 
-      color: #ffffff; 
-    }
+    h1 { font-size: 1.3rem; font-weight: 700; color: #ffffff; }
     
-    .date-container { 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 8px; 
-      margin-top: 10px; 
+    /* Date & Arrow Navigation */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .arrow-btn {
+      background: #222222;
+      color: #ffffff;
+      border: 1px solid #444444;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .week-display {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
       background: #1a1a1a;
-      padding: 6px 14px;
+      padding: 6px 12px;
       border-radius: 20px;
       border: 1px solid #333333;
     }
 
-    .date-container label { font-size: 0.85rem; color: #cccccc; font-weight: 600; }
-    
-    .week-display {
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
+    .date-picker-hidden { display: none; }
 
-    .date-picker-hidden {
-      display: none;
-    }
-
-    .change-week-btn {
-      background: #333333;
-      color: #ffffff;
-      border: none;
-      padding: 2px 8px;
+    /* View Switcher Controls */
+    .view-toggle {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 16px;
+      background: var(--card-border);
+      padding: 4px;
       border-radius: 12px;
-      font-size: 0.75rem;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      background: transparent;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      border-radius: 8px;
       cursor: pointer;
     }
 
+    .toggle-btn.active {
+      background: var(--card);
+      color: var(--accent-black);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    /* Section Cards */
     .section { 
       background: var(--card); 
       border-radius: 16px; 
@@ -99,7 +125,7 @@
     .section-title { 
       font-size: 0.95rem; 
       font-weight: 700; 
-      margin-bottom: 12px; 
+      margin-bottom: 10px; 
       color: var(--accent-black); 
       display: flex; 
       justify-content: space-between; 
@@ -108,9 +134,14 @@
       padding-bottom: 6px;
     }
 
+    /* Progress Bar */
+    .progress-container { margin-bottom: 12px; }
+    .progress-bar-bg { background: var(--day-inactive); height: 8px; border-radius: 4px; overflow: hidden; }
+    .progress-bar-fill { background: var(--accent-black); height: 100%; width: 0%; transition: width 0.3s ease; }
+    .progress-text { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right; margin-top: 4px; }
+
     /* Input Bars */
     .task-input { display: flex; gap: 8px; margin-bottom: 12px; }
-    
     input[type="text"] { 
       flex: 1; 
       padding: 10px 14px; 
@@ -120,11 +151,6 @@
       color: var(--text-main); 
       font-size: 0.85rem; 
       outline: none;
-      transition: border 0.2s ease;
-    }
-
-    input[type="text"]:focus {
-      border-color: var(--accent-black);
     }
 
     button.add-btn { 
@@ -136,12 +162,9 @@
       font-weight: 600; 
       font-size: 0.85rem;
       cursor: pointer; 
-      transition: background 0.2s ease;
     }
 
-    button.add-btn:active { background: var(--accent-black-hover); }
-
-    /* Day Tracker Grid */
+    /* Tracker Rows */
     .habit-row { 
       display: flex; 
       align-items: center; 
@@ -151,11 +174,8 @@
       font-size: 0.88rem; 
       font-weight: 500;
     }
-
     .habit-row:last-child { border-bottom: none; }
-
     .habit-label-box { display: flex; align-items: center; gap: 8px; }
-    
     .days-grid { display: flex; gap: 5px; }
     
     .day-btn { 
@@ -171,21 +191,29 @@
       align-items: center; 
       justify-content: center; 
       cursor: pointer; 
-      user-select: none;
-      transition: all 0.15s ease;
     }
-
     .day-btn.active { 
       background: var(--accent-black); 
       color: white; 
       border-color: var(--accent-black); 
-      transform: scale(1.05);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    /* Single Day Mode Target */
+    .single-day-target {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: bold;
+      border: 1px solid var(--card-border);
+      background: var(--day-inactive);
+      cursor: pointer;
+    }
+    .single-day-target.active {
+      background: var(--accent-black);
+      color: white;
     }
 
     /* List Items */
     .item-list { display: flex; flex-direction: column; gap: 8px; }
-    
     .item { 
       display: flex; 
       align-items: center; 
@@ -196,7 +224,6 @@
       font-size: 0.88rem; 
       border: 1px solid var(--card-border);
     }
-
     .item.completed { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
     
     .del-btn { 
@@ -206,10 +233,7 @@
       font-size: 0.9rem; 
       cursor: pointer; 
       padding: 2px 6px;
-      border-radius: 4px;
-      transition: color 0.2s;
     }
-
     .del-btn:hover { color: var(--accent-red); }
 
     /* Performance Report */
@@ -235,28 +259,50 @@
       align-items: center; 
       gap: 4px; 
     }
-
     .badge.better { background: var(--accent-green-bg); color: var(--accent-green); }
     .badge.worse { background: var(--accent-red-bg); color: var(--accent-red); }
     .badge.same { background: var(--day-inactive); color: var(--text-muted); }
+
+    /* Footer Backup Controls */
+    footer { text-align: center; margin-top: 20px; padding-bottom: 20px; }
+    .backup-btn {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin: 0 4px;
+    }
   </style>
 </head>
 <body>
 
   <header>
     <h1>📋 My Daily Planner</h1>
-    <div class="date-container">
-      <label>Week:</label>
-      <span class="week-display" id="weekDisplay">Aug 16 – Aug 22</span>
-      <button class="change-week-btn" onclick="document.getElementById('hiddenDatePicker').showPicker()">Change</button>
+    <div class="date-nav">
+      <button class="arrow-btn" onclick="navigateWeek(-7)">‹</button>
+      <span class="week-display" id="weekDisplay" onclick="document.getElementById('hiddenDatePicker').showPicker()">Aug 16 – Aug 22</span>
+      <button class="arrow-btn" onclick="navigateWeek(7)">›</button>
       <input type="date" id="hiddenDatePicker" class="date-picker-hidden" onchange="onDateSelected(this.value)">
     </div>
   </header>
+
+  <div class="view-toggle">
+    <button class="toggle-btn active" id="btnViewAll" onclick="setViewMode('all')">📅 Full Week</button>
+    <button class="toggle-btn" id="btnViewToday" onclick="setViewMode('today')">🎯 Today Only</button>
+  </div>
 
   <!-- NON-NEGOTIABLE HABITS TRACKER -->
   <div class="section">
     <div class="section-title">⚡ Non-negotiable habits</div>
     
+    <div class="progress-container">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+      <div class="progress-text" id="progressText">0% Completed</div>
+    </div>
+
     <div class="task-input">
       <input type="text" id="habitInput" placeholder="Add custom habit...">
       <button class="add-btn" onclick="addHabit()">+ Add Habit</button>
@@ -287,6 +333,12 @@
     <div class="item-list" id="goalsList"></div>
   </div>
 
+  <footer>
+    <button class="backup-btn" onclick="exportData()">📥 Backup Data</button>
+    <button class="backup-btn" onclick="document.getElementById('importFile').click()">📤 Restore Data</button>
+    <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+  </footer>
+
   <script>
     const defaultInitialHabits = [
       "Fajr - On time", "Dhuhr - Mosque", "Asr - Mosque", "Maghrib - Mosque",
@@ -299,6 +351,7 @@
 
     let customHabits = JSON.parse(localStorage.getItem('planner_custom_habits')) || defaultInitialHabits;
     let selectedDate = localStorage.getItem('planner_selected_date') || new Date().toISOString().split('T')[0];
+    let viewMode = 'all';
 
     let habitData = JSON.parse(localStorage.getItem('habit_tracker_history')) || {};
     let studyData = JSON.parse(localStorage.getItem('study_tracker_history')) || {};
@@ -307,10 +360,9 @@
       { text: "Prepare for Juma & Durud", done: false }
     ];
 
-    // Format week range (e.g., "Aug 16 – Aug 22")
     function getWeekRangeKey(dateStr) {
       const d = new Date(dateStr);
-      const dayOfWeek = d.getDay(); // 0 (Sun) to 6 (Sat)
+      const dayOfWeek = d.getDay();
       
       const sunday = new Date(d);
       sunday.setDate(d.getDate() - dayOfWeek);
@@ -319,12 +371,9 @@
       saturday.setDate(sunday.getDate() + 6);
 
       const options = { month: 'short', day: 'numeric' };
-      const startFmt = sunday.toLocaleDateString('en-US', options);
-      const endFmt = saturday.toLocaleDateString('en-US', options);
-
       return {
-        label: `${startFmt} – ${endFmt}`,
-        key: sunday.toISOString().split('T')[0] // Use Sunday's date as week key
+        label: `${sunday.toLocaleDateString('en-US', options)} – ${saturday.toLocaleDateString('en-US', options)}`,
+        key: sunday.toISOString().split('T')[0]
       };
     }
 
@@ -332,12 +381,25 @@
     document.getElementById('weekDisplay').innerText = currentWeekInfo.label;
     document.getElementById('hiddenDatePicker').value = selectedDate;
 
+    function navigateWeek(offsetDays) {
+      const d = new Date(selectedDate);
+      d.setDate(d.getDate() + offsetDays);
+      onDateSelected(d.toISOString().split('T')[0]);
+    }
+
     function onDateSelected(val) {
       if (!val) return;
       selectedDate = val;
       localStorage.setItem('planner_selected_date', selectedDate);
       currentWeekInfo = getWeekRangeKey(selectedDate);
       document.getElementById('weekDisplay').innerText = currentWeekInfo.label;
+      renderAll();
+    }
+
+    function setViewMode(mode) {
+      viewMode = mode;
+      document.getElementById('btnViewAll').classList.toggle('active', mode === 'all');
+      document.getElementById('btnViewToday').classList.toggle('active', mode === 'today');
       renderAll();
     }
 
@@ -354,10 +416,12 @@
     }
 
     function deleteHabit(habit) {
-      customHabits = customHabits.filter(h => h !== habit);
-      localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
-      renderHabits();
-      renderReport();
+      if (confirm(`Delete "${habit}" habit?`)) {
+        customHabits = customHabits.filter(h => h !== habit);
+        localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
+        renderHabits();
+        renderReport();
+      }
     }
 
     function renderHabits() {
@@ -367,6 +431,10 @@
       const weekKey = currentWeekInfo.key;
       if (!habitData[weekKey]) habitData[weekKey] = {};
 
+      const todayIdx = new Date().getDay();
+      let totalPossible = customHabits.length * 7;
+      let totalCompleted = 0;
+
       customHabits.forEach((habit) => {
         const row = document.createElement('div');
         row.className = 'habit-row';
@@ -374,7 +442,13 @@
         let daysHtml = '';
         days.forEach((day, dIdx) => {
           const active = habitData[weekKey][`${habit}-${dIdx}`] ? 'active' : '';
-          daysHtml += `<div class="day-btn ${active}" onclick="toggleHabit('${habit}', ${dIdx})">${day}</div>`;
+          if (active) totalCompleted++;
+
+          if (viewMode === 'all') {
+            daysHtml += `<div class="day-btn ${active}" onclick="toggleHabit('${habit}', ${dIdx})">${day}</div>`;
+          } else if (dIdx === todayIdx) {
+            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleHabit('${habit}', ${dIdx})">${active ? '✓ Done' : 'Check In'}</div>`;
+          }
         });
 
         row.innerHTML = `
@@ -386,6 +460,11 @@
         `;
         container.appendChild(row);
       });
+
+      // Update Progress Bar
+      const pct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+      document.getElementById('progressText').innerText = `${pct}% Weekly Completion`;
     }
 
     function toggleHabit(habit, dayIndex) {
@@ -403,6 +482,7 @@
 
       const weekKey = currentWeekInfo.key;
       if (!studyData[weekKey]) studyData[weekKey] = {};
+      const todayIdx = new Date().getDay();
 
       defaultStudy.forEach((subject) => {
         const row = document.createElement('div');
@@ -411,7 +491,12 @@
         let daysHtml = '';
         days.forEach((day, dIdx) => {
           const active = studyData[weekKey][`study-${subject}-${dIdx}`] ? 'active' : '';
-          daysHtml += `<div class="day-btn ${active}" onclick="toggleStudy('${subject}', ${dIdx})">${day}</div>`;
+          
+          if (viewMode === 'all') {
+            daysHtml += `<div class="day-btn ${active}" onclick="toggleStudy('${subject}', ${dIdx})">${day}</div>`;
+          } else if (dIdx === todayIdx) {
+            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleStudy('${subject}', ${dIdx})">${active ? '✓ Done' : 'Check In'}</div>`;
+          }
         });
 
         row.innerHTML = `<span>${subject}</span><div class="days-grid">${daysHtml}</div>`;
@@ -496,8 +581,38 @@
     }
 
     function deleteGoal(i) {
-      goals.splice(i, 1);
-      renderGoals();
+      if (confirm(`Delete goal: "${goals[i].text}"?`)) {
+        goals.splice(i, 1);
+        renderGoals();
+      }
+    }
+
+    function exportData() {
+      const backup = { customHabits, habitData, studyData, goals };
+      const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `planner_backup_${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+    }
+
+    function importData(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = JSON.parse(evt.target.result);
+          if (data.customHabits) localStorage.setItem('planner_custom_habits', JSON.stringify(data.customHabits));
+          if (data.habitData) localStorage.setItem('habit_tracker_history', JSON.stringify(data.habitData));
+          if (data.studyData) localStorage.setItem('study_tracker_history', JSON.stringify(data.studyData));
+          if (data.goals) localStorage.setItem('planner_goals', JSON.stringify(data.goals));
+          location.reload();
+        } catch (err) {
+          alert('Invalid JSON backup file.');
+        }
+      };
+      reader.readAsText(file);
     }
 
     function renderAll() {
