@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Custom Habit & Chores Planner</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --accent: #3b82f6;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 12px; height: 100vh; overflow-y: auto; }
+
+    header { text-align: center; margin-bottom: 12px; }
+    h1 { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+    
+    .date-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; }
+    .date-container label { font-size: 0.8rem; color: var(--muted); }
+    .date-container input[type="date"] { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
+
+    .section { background: var(--card); border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border); }
+    .section-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-green); border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* Input Bar */
+    .task-input { display: flex; gap: 6px; margin-bottom: 10px; }
+    input[type="text"] { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 0.8rem; }
+    button.add-btn { padding: 8px 12px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+
+    /* Day Tracker Grid */
+    .habit-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
+    .habit-label-box { display: flex; align-items: center; gap: 6px; }
+    .days-grid { display: flex; gap: 4px; }
+    .day-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); background: #0f172a; color: var(--muted); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .day-btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+
+    /* List Sections */
+    .item-list { display: flex; flex-direction: column; gap: 6px; }
+    .item { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
+    .item.completed { text-decoration: line-through; color: var(--muted); }
+    .del-btn { background: transparent; color: var(--accent-red); border: none; font-size: 0.85rem; cursor: pointer; }
+
+    /* Report Section Styles */
+    .report-card { background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
+    .badge { font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; display: flex; align-items: center; gap: 3px; }
+    .badge.better { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+    .badge.worse { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+    .badge.same { background: rgba(148, 163, 184, 0.2); color: var(--muted); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Chores & Habits Planner</h1>
+    <div class="date-container">
+      <label for="weekDate">Week of:</label>
+      <input type="date" id="weekDate" onchange="changeWeekDate(this.value)">
+    </div>
+  </header>
+
+  <!-- NON-NEGOTIABLE HABITS TRACKER -->
+  <div class="section">
+    <div class="section-title">⚡ Non-negotiable habits</div>
+    
+    <!-- Add Habit Input -->
+    <div class="task-input">
+      <input type="text" id="habitInput" placeholder="Add custom habit...">
+      <button class="add-btn" onclick="addHabit()">Add Habit</button>
+    </div>
+
+    <div id="habitsContainer"></div>
+  </div>
+
+  <!-- WEEKLY STUDY PLAN TRACKER -->
+  <div class="section">
+    <div class="section-title">📚 Weekly Study Plan</div>
+    <div id="studyContainer"></div>
+  </div>
+
+  <!-- PERFORMANCE REPORT -->
+  <div class="section">
+    <div class="section-title">📊 Weekly Performance Report</div>
+    <div id="reportContainer"></div>
+  </div>
+
+  <!-- GOALS & TASKS -->
+  <div class="section">
+    <div class="section-title">🎯 Goals for the Week</div>
+    <div class="task-input">
+      <input type="text" id="goalInput" placeholder="Add weekly goal...">
+      <button class="add-btn" onclick="addGoal()">Add</button>
+    </div>
+    <div class="item-list" id="goalsList"></div>
+  </div>
+
+  <script>
+    const defaultInitialHabits = [
+      "Fajr - On time", "Dhuhr - Mosque", "Asr - Mosque", "Maghrib - Mosque",
+      "Isha - Mosque", "Quran", "Adhkar - Morning", "Adhkar - Evening",
+      "Walking", "Ghad al basar", "Learn Something new"
+    ];
+
+    const defaultStudy = ["GRE", "English", "Turkish", "Arabic", "Dari / Pashto"];
+    const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
+    // Load custom habit list from local storage or set defaults
+    let customHabits = JSON.parse(localStorage.getItem('planner_custom_habits')) || defaultInitialHabits;
+
+    // Local Storage keys for dates
+    let currentWeek = localStorage.getItem('planner_current_week') || new Date().toISOString().split('T')[0];
+    document.getElementById('weekDate').value = currentWeek;
+
+    let habitData = JSON.parse(localStorage.getItem('habit_tracker_history')) || {};
+    let studyData = JSON.parse(localStorage.getItem('study_tracker_history')) || {};
+    let goals = JSON.parse(localStorage.getItem('planner_goals')) || [
+      { text: "Show Underst sed clothes to seller in Beylikduzu", done: false },
+      { text: "Prepare for Juma & Durud", done: false }
+    ];
+
+    function changeWeekDate(val) {
+      currentWeek = val;
+      localStorage.setItem('planner_current_week', currentWeek);
+      renderAll();
+    }
+
+    function addHabit() {
+      const inp = document.getElementById('habitInput');
+      const val = inp.value.trim();
+      if (val && !customHabits.includes(val)) {
+        customHabits.push(val);
+        localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
+        inp.value = '';
+        renderHabits();
+        renderReport();
+      }
+    }
+
+    function deleteHabit(habit) {
+      customHabits = customHabits.filter(h => h !== habit);
+      localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
+      renderHabits();
+      renderReport();
+    }
+
+    function renderHabits() {
+      const container = document.getElementById('habitsContainer');
+      container.innerHTML = '';
+      
+      if (!habitData[currentWeek]) habitData[currentWeek] = {};
+
+      customHabits.forEach((habit) => {
+        const row = document.createElement('div');
+        row.className = 'habit-row';
+        
+        let daysHtml = '';
+        days.forEach((day, dIdx) => {
+          const active = habitData[currentWeek][`${habit}-${dIdx}`] ? 'active' : '';
+          daysHtml += `<div class="day-btn ${active}" onclick="toggleHabit('${habit}', ${dIdx})">${day}</div>`;
+        });
+
+        row.innerHTML = `
+          <div class="habit-label-box">
+            <button class="del-btn" onclick="deleteHabit('${habit}')">✕</button>
+            <span>${habit}</span>
+          </div>
+          <div class="days-grid">${daysHtml}</div>
+        `;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleHabit(habit, dayIndex) {
+      const key = `${habit}-${dayIndex}`;
+      habitData[currentWeek][key] = !habitData[currentWeek][key];
+      localStorage.setItem('habit_tracker_history', JSON.stringify(habitData));
+      renderHabits();
+      renderReport();
+    }
+
+    function renderStudy() {
+      const container = document.getElementById('studyContainer');
+      container.innerHTML = '';
+
+      if (!studyData[currentWeek]) studyData[currentWeek] = {};
+
+      defaultStudy.forEach((subject) => {
+        const row = document.createElement('div');
+        row.className = 'habit-row';
+        
+        let daysHtml = '';
+        days.forEach((day, dIdx) => {
+          const active = studyData[currentWeek][`study-${subject}-${dIdx}`] ? 'active' : '';
+          daysHtml += `<div class="day-btn ${active}" onclick="toggleStudy('${subject}', ${dIdx})">${day}</div>`;
+        });
+
+        row.innerHTML = `<span>${subject}</span><div class="days-grid">${daysHtml}</div>`;
+        container.appendChild(row);
+      });
+    }
+
+    function toggleStudy(subject, dayIndex) {
+      const key = `study-${subject}-${dayIndex}`;
+      studyData[currentWeek][key] = !studyData[currentWeek][key];
+      localStorage.setItem('study_tracker_history', JSON.stringify(studyData));
+      renderStudy();
+    }
+
+    function renderReport() {
+      const container = document.getElementById('reportContainer');
+      container.innerHTML = '';
+
+      const weekKeys = Object.keys(habitData).sort();
+      const currIdx = weekKeys.indexOf(currentWeek);
+      const prevWeekKey = currIdx > 0 ? weekKeys[currIdx - 1] : null;
+
+      customHabits.forEach((habit) => {
+        let currCount = 0;
+        let prevCount = 0;
+
+        for (let i = 0; i < 7; i++) {
+          if (habitData[currentWeek] && habitData[currentWeek][`${habit}-${i}`]) currCount++;
+          if (prevWeekKey && habitData[prevWeekKey] && habitData[prevWeekKey][`${habit}-${i}`]) prevCount++;
+        }
+
+        let badgeHtml = '';
+        if (!prevWeekKey) {
+          badgeHtml = `<span class="badge same">${currCount}/7 Days</span>`;
+        } else if (currCount > prevCount) {
+          badgeHtml = `<span class="badge better">▲ Better (+${currCount - prevCount})</span>`;
+        } else if (currCount < prevCount) {
+          badgeHtml = `<span class="badge worse">▼ Worse (${currCount - prevCount})</span>`;
+        } else {
+          badgeHtml = `<span class="badge same">▶ Same (${currCount}/7)</span>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'report-card';
+        card.innerHTML = `<span>${habit}</span>${badgeHtml}`;
+        container.appendChild(card);
+      });
+    }
+
+    function renderGoals() {
+      localStorage.setItem('planner_goals', JSON.stringify(goals));
+      const list = document.getElementById('goalsList');
+      list.innerHTML = '';
+      goals.forEach((g, i) => {
+        const item = document.createElement('div');
+        item.className = `item ${g.done ? 'completed' : ''}`;
+        item.innerHTML = `
+          <div>
+            <input type="checkbox" ${g.done ? 'checked' : ''} onclick="toggleGoal(${i})">
+            <span style="margin-left: 6px;">${g.text}</span>
+          </div>
+          <button class="del-btn" onclick="deleteGoal(${i})">✕</button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function addGoal() {
+      const inp = document.getElementById('goalInput');
+      if (inp.value.trim()) {
+        goals.push({ text: inp.value.trim(), done: false });
+        inp.value = '';
+        renderGoals();
+      }
+    }
+
+    function toggleGoal(i) {
+      goals[i].done = !goals[i].done;
+      renderGoals();
+    }
+
+    function deleteGoal(i) {
+      goals.splice(i, 1);
+      renderGoals();
+    }
+
+    function renderAll() {
+      renderHabits();
+      renderStudy();
+      renderReport();
+      renderGoals();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
