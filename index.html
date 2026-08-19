@@ -134,35 +134,21 @@
       padding-bottom: 6px;
     }
 
+    .title-add-icon {
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 2px 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .title-add-icon:hover { background: var(--day-inactive); color: var(--accent-black); }
+
     /* Progress Bar */
     .progress-container { margin-bottom: 12px; }
     .progress-bar-bg { background: var(--day-inactive); height: 8px; border-radius: 4px; overflow: hidden; }
     .progress-bar-fill { background: var(--accent-black); height: 100%; width: 0%; transition: width 0.3s ease; }
     .progress-text { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right; margin-top: 4px; }
-
-    /* Input Bars */
-    .task-input { display: flex; gap: 8px; margin-bottom: 12px; }
-    input[type="text"] { 
-      flex: 1; 
-      padding: 10px 14px; 
-      border-radius: 10px; 
-      border: 1px solid var(--card-border); 
-      background: var(--bg); 
-      color: var(--text-main); 
-      font-size: 0.85rem; 
-      outline: none;
-    }
-
-    button.add-btn { 
-      padding: 10px 16px; 
-      border-radius: 10px; 
-      border: none; 
-      background: var(--accent-black); 
-      color: white; 
-      font-weight: 600; 
-      font-size: 0.85rem;
-      cursor: pointer; 
-    }
 
     /* Tracker Rows */
     .habit-row { 
@@ -225,16 +211,6 @@
       border: 1px solid var(--card-border);
     }
     .item.completed { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
-    
-    .del-btn { 
-      background: transparent; 
-      color: var(--text-muted); 
-      border: none; 
-      font-size: 0.9rem; 
-      cursor: pointer; 
-      padding: 2px 6px;
-    }
-    .del-btn:hover { color: var(--accent-red); }
 
     /* Performance Report */
     .report-card { 
@@ -263,17 +239,106 @@
     .badge.worse { background: var(--accent-red-bg); color: var(--accent-red); }
     .badge.same { background: var(--day-inactive); color: var(--text-muted); }
 
-    /* Footer Backup Controls */
+    /* Footer & Hidden Options Modal */
     footer { text-align: center; margin-top: 20px; padding-bottom: 20px; }
-    .backup-btn {
+    .footer-btn {
       background: transparent;
       border: 1px solid var(--card-border);
-      padding: 6px 12px;
+      padding: 8px 14px;
       border-radius: 8px;
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--text-muted);
       cursor: pointer;
-      margin: 0 4px;
+      margin: 4px;
+      font-weight: 600;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.active { display: flex; }
+    
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 450px;
+      max-height: 85vh;
+      overflow-y: auto;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .modal-section { margin-bottom: 16px; }
+    .modal-section-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 8px; color: var(--text-muted); }
+
+    .task-input { display: flex; gap: 8px; margin-bottom: 10px; }
+    input[type="text"] { 
+      flex: 1; 
+      padding: 10px 14px; 
+      border-radius: 10px; 
+      border: 1px solid var(--card-border); 
+      background: var(--bg); 
+      color: var(--text-main); 
+      font-size: 0.85rem; 
+      outline: none;
+    }
+
+    button.add-btn { 
+      padding: 10px 16px; 
+      border-radius: 10px; 
+      border: none; 
+      background: var(--accent-black); 
+      color: white; 
+      font-weight: 600; 
+      font-size: 0.85rem;
+      cursor: pointer; 
+    }
+
+    .manage-list { display: flex; flex-direction: column; gap: 6px; }
+    .manage-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 10px;
+      background: var(--bg);
+      border-radius: 8px;
+      font-size: 0.85rem;
+    }
+
+    .del-btn { 
+      background: transparent; 
+      color: var(--accent-red); 
+      border: none; 
+      font-size: 0.9rem; 
+      cursor: pointer; 
+      padding: 2px 6px;
     }
   </style>
 </head>
@@ -296,16 +361,14 @@
 
   <!-- NON-NEGOTIABLE HABITS TRACKER -->
   <div class="section">
-    <div class="section-title">⚡ Non-negotiable habits</div>
+    <div class="section-title">
+      <span>⚡ Non-negotiable habits</span>
+      <span class="title-add-icon" onclick="openModal('habit')">➕ Options</span>
+    </div>
     
     <div class="progress-container">
       <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
       <div class="progress-text" id="progressText">0% Completed</div>
-    </div>
-
-    <div class="task-input">
-      <input type="text" id="habitInput" placeholder="Add custom habit...">
-      <button class="add-btn" onclick="addHabit()">+ Add Habit</button>
     </div>
 
     <div id="habitsContainer"></div>
@@ -325,19 +388,52 @@
 
   <!-- GOALS & TASKS -->
   <div class="section">
-    <div class="section-title">🎯 Goals for the Week</div>
-    <div class="task-input">
-      <input type="text" id="goalInput" placeholder="Add weekly goal...">
-      <button class="add-btn" onclick="addGoal()">+ Add Goal</button>
+    <div class="section-title">
+      <span>🎯 Goals for the Week</span>
+      <span class="title-add-icon" onclick="openModal('goal')">➕ Options</span>
     </div>
     <div class="item-list" id="goalsList"></div>
   </div>
 
   <footer>
-    <button class="backup-btn" onclick="exportData()">📥 Backup Data</button>
-    <button class="backup-btn" onclick="document.getElementById('importFile').click()">📤 Restore Data</button>
+    <button class="footer-btn" onclick="openModal('all')">⚙️ Add / Manage Items</button>
+    <br><br>
+    <button class="footer-btn" style="font-size:0.7rem;" onclick="exportData()">📥 Backup</button>
+    <button class="footer-btn" style="font-size:0.7rem;" onclick="document.getElementById('importFile').click()">📤 Restore</button>
     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
   </footer>
+
+  <!-- MODAL FOR ADDING & MANAGING ITEMS -->
+  <div class="modal-overlay" id="optionsModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">⚙️ Manage Items</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+
+      <!-- Add Habits Section -->
+      <div class="modal-section" id="modalHabitSection">
+        <div class="modal-section-title">ADD NEW HABIT</div>
+        <div class="task-input">
+          <input type="text" id="habitInput" placeholder="New habit name...">
+          <button class="add-btn" onclick="addHabit()">Add</button>
+        </div>
+        <div class="manage-list" id="manageHabitsList"></div>
+      </div>
+
+      <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--card-border);">
+
+      <!-- Add Goals Section -->
+      <div class="modal-section" id="modalGoalSection">
+        <div class="modal-section-title">ADD NEW WEEKLY GOAL</div>
+        <div class="task-input">
+          <input type="text" id="goalInput" placeholder="New goal description...">
+          <button class="add-btn" onclick="addGoal()">Add</button>
+        </div>
+        <div class="manage-list" id="manageGoalsList"></div>
+      </div>
+    </div>
+  </div>
 
   <script>
     const defaultInitialHabits = [
@@ -403,6 +499,15 @@
       renderAll();
     }
 
+    function openModal(focusArea) {
+      document.getElementById('optionsModal').classList.add('active');
+      renderModalLists();
+    }
+
+    function closeModal() {
+      document.getElementById('optionsModal').classList.remove('active');
+    }
+
     function addHabit() {
       const inp = document.getElementById('habitInput');
       const val = inp.value.trim();
@@ -410,8 +515,8 @@
         customHabits.push(val);
         localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
         inp.value = '';
-        renderHabits();
-        renderReport();
+        renderAll();
+        renderModalLists();
       }
     }
 
@@ -419,9 +524,47 @@
       if (confirm(`Delete "${habit}" habit?`)) {
         customHabits = customHabits.filter(h => h !== habit);
         localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
-        renderHabits();
-        renderReport();
+        renderAll();
+        renderModalLists();
       }
+    }
+
+    function addGoal() {
+      const inp = document.getElementById('goalInput');
+      if (inp.value.trim()) {
+        goals.push({ text: inp.value.trim(), done: false });
+        inp.value = '';
+        renderGoals();
+        renderModalLists();
+      }
+    }
+
+    function deleteGoal(i) {
+      if (confirm(`Delete goal: "${goals[i].text}"?`)) {
+        goals.splice(i, 1);
+        renderGoals();
+        renderModalLists();
+      }
+    }
+
+    function renderModalLists() {
+      const hList = document.getElementById('manageHabitsList');
+      hList.innerHTML = '';
+      customHabits.forEach((h) => {
+        const item = document.createElement('div');
+        item.className = 'manage-item';
+        item.innerHTML = `<span>${h}</span><button class="del-btn" onclick="deleteHabit('${h}')">✕</button>`;
+        hList.appendChild(item);
+      });
+
+      const gList = document.getElementById('manageGoalsList');
+      gList.innerHTML = '';
+      goals.forEach((g, i) => {
+        const item = document.createElement('div');
+        item.className = 'manage-item';
+        item.innerHTML = `<span>${g.text}</span><button class="del-btn" onclick="deleteGoal(${i})">✕</button>`;
+        gList.appendChild(item);
+      });
     }
 
     function renderHabits() {
@@ -451,17 +594,10 @@
           }
         });
 
-        row.innerHTML = `
-          <div class="habit-label-box">
-            <button class="del-btn" onclick="deleteHabit('${habit}')">✕</button>
-            <span>${habit}</span>
-          </div>
-          <div class="days-grid">${daysHtml}</div>
-        `;
+        row.innerHTML = `<span>${habit}</span><div class="days-grid">${daysHtml}</div>`;
         container.appendChild(row);
       });
 
-      // Update Progress Bar
       const pct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
       document.getElementById('progressBar').style.width = `${pct}%`;
       document.getElementById('progressText').innerText = `${pct}% Weekly Completion`;
@@ -560,31 +696,14 @@
             <input type="checkbox" ${g.done ? 'checked' : ''} onclick="toggleGoal(${i})">
             <span style="margin-left: 8px;">${g.text}</span>
           </div>
-          <button class="del-btn" onclick="deleteGoal(${i})">✕</button>
         `;
         list.appendChild(item);
       });
     }
 
-    function addGoal() {
-      const inp = document.getElementById('goalInput');
-      if (inp.value.trim()) {
-        goals.push({ text: inp.value.trim(), done: false });
-        inp.value = '';
-        renderGoals();
-      }
-    }
-
     function toggleGoal(i) {
       goals[i].done = !goals[i].done;
       renderGoals();
-    }
-
-    function deleteGoal(i) {
-      if (confirm(`Delete goal: "${goals[i].text}"?`)) {
-        goals.splice(i, 1);
-        renderGoals();
-      }
     }
 
     function exportData() {
