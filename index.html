@@ -7,62 +7,228 @@
   
   <!-- Web App Manifest Link -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#3b82f6">
+  <meta name="theme-color" content="#c86d51">
 
   <style>
     :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --accent: #3b82f6;
-      --accent-green: #10b981;
-      --accent-red: #ef4444;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --border: #334155;
+      --bg: #faf8f5;
+      --card: #ffffff;
+      --card-border: #eee8df;
+      --text-main: #2d2a26;
+      --text-muted: #7c756e;
+      --accent-warm: #c86d51;
+      --accent-warm-hover: #b25b41;
+      --accent-green: #4a7c59;
+      --accent-green-bg: #eaf3ed;
+      --accent-red: #c94a4a;
+      --accent-red-bg: #fdf2f2;
+      --day-inactive: #f2ece4;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-    body { background: var(--bg); color: var(--text); padding: 12px; height: 100vh; overflow-y: auto; }
 
-    header { text-align: center; margin-bottom: 12px; }
-    h1 { font-size: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
     
-    .date-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px; }
-    .date-container label { font-size: 0.8rem; color: var(--muted); }
-    .date-container input[type="date"] { background: var(--card); border: 1px solid var(--border); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 0.8rem; }
+    body { 
+      background: var(--bg); 
+      color: var(--text-main); 
+      padding: 16px; 
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+    }
 
-    .section { background: var(--card); border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border); }
-    .section-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-green); border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    header { 
+      text-align: center; 
+      margin-bottom: 20px; 
+      padding-bottom: 12px;
+      border-bottom: 2px dashed var(--card-border);
+    }
 
-    /* Input Controls */
-    .task-input { display: flex; gap: 6px; margin-bottom: 10px; }
-    input[type="text"] { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 0.8rem; }
-    button.add-btn { padding: 8px 12px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
+    h1 { 
+      font-size: 1.4rem; 
+      font-weight: 700;
+      letter-spacing: 0.5px; 
+      color: var(--accent-warm); 
+    }
+    
+    .date-container { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+      margin-top: 10px; 
+      background: var(--card);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--card-border);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .date-container label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    
+    .date-container input[type="date"] { 
+      border: none;
+      background: transparent;
+      color: var(--text-main); 
+      font-weight: 600;
+      font-size: 0.85rem; 
+      outline: none;
+    }
+
+    .section { 
+      background: var(--card); 
+      border-radius: 16px; 
+      padding: 16px; 
+      margin-bottom: 16px; 
+      border: 1px solid var(--card-border); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+
+    .section-title { 
+      font-size: 1rem; 
+      font-weight: 700; 
+      margin-bottom: 12px; 
+      color: var(--accent-warm); 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+    }
+
+    /* Friendly Input Bars */
+    .task-input { display: flex; gap: 8px; margin-bottom: 12px; }
+    
+    input[type="text"] { 
+      flex: 1; 
+      padding: 10px 14px; 
+      border-radius: 10px; 
+      border: 1px solid var(--card-border); 
+      background: var(--bg); 
+      color: var(--text-main); 
+      font-size: 0.85rem; 
+      outline: none;
+      transition: border 0.2s ease;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--accent-warm);
+    }
+
+    button.add-btn { 
+      padding: 10px 16px; 
+      border-radius: 10px; 
+      border: none; 
+      background: var(--accent-warm); 
+      color: white; 
+      font-weight: 600; 
+      font-size: 0.85rem;
+      cursor: pointer; 
+      transition: background 0.2s ease;
+    }
+
+    button.add-btn:active { background: var(--accent-warm-hover); }
 
     /* Day Tracker Grid */
-    .habit-row { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; }
-    .habit-label-box { display: flex; align-items: center; gap: 6px; }
-    .days-grid { display: flex; gap: 4px; }
-    .day-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); background: #0f172a; color: var(--muted); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .day-btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
+    .habit-row { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 8px 0; 
+      border-bottom: 1px solid #f6f2ec; 
+      font-size: 0.88rem; 
+      font-weight: 500;
+    }
 
-    /* List Item Styles */
-    .item-list { display: flex; flex-direction: column; gap: 6px; }
-    .item { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
-    .item.completed { text-decoration: line-through; color: var(--muted); }
-    .del-btn { background: transparent; color: var(--accent-red); border: none; font-size: 0.85rem; cursor: pointer; }
+    .habit-row:last-child { border-bottom: none; }
 
-    /* Report Section Styles */
-    .report-card { background: #0f172a; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; font-size: 0.82rem; display: flex; justify-content: space-between; align-items: center; }
-    .badge { font-weight: bold; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; display: flex; align-items: center; gap: 3px; }
-    .badge.better { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
-    .badge.worse { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
-    .badge.same { background: rgba(148, 163, 184, 0.2); color: var(--muted); }
+    .habit-label-box { display: flex; align-items: center; gap: 8px; }
+    
+    .days-grid { display: flex; gap: 5px; }
+    
+    .day-btn { 
+      width: 26px; 
+      height: 26px; 
+      border-radius: 50%; 
+      border: 1px solid var(--card-border); 
+      background: var(--day-inactive); 
+      color: var(--text-muted); 
+      font-size: 0.7rem; 
+      font-weight: 700;
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .day-btn.active { 
+      background: var(--accent-warm); 
+      color: white; 
+      border-color: var(--accent-warm); 
+      transform: scale(1.05);
+      box-shadow: 0 2px 6px rgba(200, 109, 81, 0.3);
+    }
+
+    /* List Items */
+    .item-list { display: flex; flex-direction: column; gap: 8px; }
+    
+    .item { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      background: var(--bg); 
+      padding: 10px 12px; 
+      border-radius: 10px; 
+      font-size: 0.88rem; 
+      border: 1px solid var(--card-border);
+    }
+
+    .item.completed { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
+    
+    .del-btn { 
+      background: transparent; 
+      color: var(--text-muted); 
+      border: none; 
+      font-size: 0.9rem; 
+      cursor: pointer; 
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color 0.2s;
+    }
+
+    .del-btn:hover { color: var(--accent-red); }
+
+    /* Performance Report */
+    .report-card { 
+      background: var(--bg); 
+      padding: 10px 14px; 
+      border-radius: 10px; 
+      margin-bottom: 8px; 
+      font-size: 0.85rem; 
+      font-weight: 500;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      border: 1px solid var(--card-border);
+    }
+
+    .badge { 
+      font-weight: 700; 
+      padding: 4px 8px; 
+      border-radius: 8px; 
+      font-size: 0.75rem; 
+      display: flex; 
+      align-items: center; 
+      gap: 4px; 
+    }
+
+    .badge.better { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge.worse { background: var(--accent-red-bg); color: var(--accent-red); }
+    .badge.same { background: var(--day-inactive); color: var(--text-muted); }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Chores & Habits Planner</h1>
+    <h1>🌿 My Daily Planner</h1>
     <div class="date-container">
       <label for="weekDate">Week of:</label>
       <input type="date" id="weekDate" onchange="changeWeekDate(this.value)">
@@ -75,7 +241,7 @@
     
     <div class="task-input">
       <input type="text" id="habitInput" placeholder="Add custom habit...">
-      <button class="add-btn" onclick="addHabit()">Add Habit</button>
+      <button class="add-btn" onclick="addHabit()">+ Add Habit</button>
     </div>
 
     <div id="habitsContainer"></div>
@@ -98,7 +264,7 @@
     <div class="section-title">🎯 Goals for the Week</div>
     <div class="task-input">
       <input type="text" id="goalInput" placeholder="Add weekly goal...">
-      <button class="add-btn" onclick="addGoal()">Add</button>
+      <button class="add-btn" onclick="addGoal()">+ Add Goal</button>
     </div>
     <div class="item-list" id="goalsList"></div>
   </div>
@@ -257,7 +423,7 @@
         item.innerHTML = `
           <div>
             <input type="checkbox" ${g.done ? 'checked' : ''} onclick="toggleGoal(${i})">
-            <span style="margin-left: 6px;">${g.text}</span>
+            <span style="margin-left: 8px;">${g.text}</span>
           </div>
           <button class="del-btn" onclick="deleteGoal(${i})">✕</button>
         `;
