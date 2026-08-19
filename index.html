@@ -7,22 +7,23 @@
   
   <!-- Web App Manifest Link -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#c86d51">
+  <!-- System / Navigation bar set to black -->
+  <meta name="theme-color" content="#000000">
 
   <style>
     :root {
       --bg: #faf8f5;
       --card: #ffffff;
-      --card-border: #eee8df;
-      --text-main: #2d2a26;
-      --text-muted: #7c756e;
-      --accent-warm: #c86d51;
-      --accent-warm-hover: #b25b41;
-      --accent-green: #4a7c59;
-      --accent-green-bg: #eaf3ed;
-      --accent-red: #c94a4a;
-      --accent-red-bg: #fdf2f2;
-      --day-inactive: #f2ece4;
+      --card-border: #e2ded7;
+      --text-main: #111111;
+      --text-muted: #666666;
+      --accent-black: #000000;
+      --accent-black-hover: #222222;
+      --accent-green: #2e7d32;
+      --accent-green-bg: #e8f5e9;
+      --accent-red: #c62828;
+      --accent-red-bg: #ffebee;
+      --day-inactive: #f0ece6;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
@@ -39,15 +40,18 @@
     header { 
       text-align: center; 
       margin-bottom: 20px; 
-      padding-bottom: 12px;
-      border-bottom: 2px dashed var(--card-border);
+      padding: 14px;
+      background: var(--accent-black);
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     h1 { 
-      font-size: 1.4rem; 
+      font-size: 1.3rem; 
       font-weight: 700;
       letter-spacing: 0.5px; 
-      color: var(--accent-warm); 
+      color: #ffffff; 
     }
     
     .date-container { 
@@ -55,22 +59,32 @@
       align-items: center; 
       gap: 8px; 
       margin-top: 10px; 
-      background: var(--card);
+      background: #1a1a1a;
       padding: 6px 14px;
       border-radius: 20px;
-      border: 1px solid var(--card-border);
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+      border: 1px solid #333333;
     }
 
-    .date-container label { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+    .date-container label { font-size: 0.85rem; color: #cccccc; font-weight: 600; }
     
-    .date-container input[type="date"] { 
+    .week-display {
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .date-picker-hidden {
+      display: none;
+    }
+
+    .change-week-btn {
+      background: #333333;
+      color: #ffffff;
       border: none;
-      background: transparent;
-      color: var(--text-main); 
-      font-weight: 600;
-      font-size: 0.85rem; 
-      outline: none;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
     }
 
     .section { 
@@ -83,16 +97,18 @@
     }
 
     .section-title { 
-      font-size: 1rem; 
+      font-size: 0.95rem; 
       font-weight: 700; 
       margin-bottom: 12px; 
-      color: var(--accent-warm); 
+      color: var(--accent-black); 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
+      border-bottom: 2px solid var(--bg);
+      padding-bottom: 6px;
     }
 
-    /* Friendly Input Bars */
+    /* Input Bars */
     .task-input { display: flex; gap: 8px; margin-bottom: 12px; }
     
     input[type="text"] { 
@@ -108,14 +124,14 @@
     }
 
     input[type="text"]:focus {
-      border-color: var(--accent-warm);
+      border-color: var(--accent-black);
     }
 
     button.add-btn { 
       padding: 10px 16px; 
       border-radius: 10px; 
       border: none; 
-      background: var(--accent-warm); 
+      background: var(--accent-black); 
       color: white; 
       font-weight: 600; 
       font-size: 0.85rem;
@@ -123,7 +139,7 @@
       transition: background 0.2s ease;
     }
 
-    button.add-btn:active { background: var(--accent-warm-hover); }
+    button.add-btn:active { background: var(--accent-black-hover); }
 
     /* Day Tracker Grid */
     .habit-row { 
@@ -131,7 +147,7 @@
       align-items: center; 
       justify-content: space-between; 
       padding: 8px 0; 
-      border-bottom: 1px solid #f6f2ec; 
+      border-bottom: 1px solid #f2eee8; 
       font-size: 0.88rem; 
       font-weight: 500;
     }
@@ -160,11 +176,11 @@
     }
 
     .day-btn.active { 
-      background: var(--accent-warm); 
+      background: var(--accent-black); 
       color: white; 
-      border-color: var(--accent-warm); 
+      border-color: var(--accent-black); 
       transform: scale(1.05);
-      box-shadow: 0 2px 6px rgba(200, 109, 81, 0.3);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     }
 
     /* List Items */
@@ -228,10 +244,12 @@
 <body>
 
   <header>
-    <h1>🌿 My Daily Planner</h1>
+    <h1>📋 My Daily Planner</h1>
     <div class="date-container">
-      <label for="weekDate">Week of:</label>
-      <input type="date" id="weekDate" onchange="changeWeekDate(this.value)">
+      <label>Week:</label>
+      <span class="week-display" id="weekDisplay">Aug 16 – Aug 22</span>
+      <button class="change-week-btn" onclick="document.getElementById('hiddenDatePicker').showPicker()">Change</button>
+      <input type="date" id="hiddenDatePicker" class="date-picker-hidden" onchange="onDateSelected(this.value)">
     </div>
   </header>
 
@@ -280,8 +298,7 @@
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     let customHabits = JSON.parse(localStorage.getItem('planner_custom_habits')) || defaultInitialHabits;
-    let currentWeek = localStorage.getItem('planner_current_week') || new Date().toISOString().split('T')[0];
-    document.getElementById('weekDate').value = currentWeek;
+    let selectedDate = localStorage.getItem('planner_selected_date') || new Date().toISOString().split('T')[0];
 
     let habitData = JSON.parse(localStorage.getItem('habit_tracker_history')) || {};
     let studyData = JSON.parse(localStorage.getItem('study_tracker_history')) || {};
@@ -290,9 +307,37 @@
       { text: "Prepare for Juma & Durud", done: false }
     ];
 
-    function changeWeekDate(val) {
-      currentWeek = val;
-      localStorage.setItem('planner_current_week', currentWeek);
+    // Format week range (e.g., "Aug 16 – Aug 22")
+    function getWeekRangeKey(dateStr) {
+      const d = new Date(dateStr);
+      const dayOfWeek = d.getDay(); // 0 (Sun) to 6 (Sat)
+      
+      const sunday = new Date(d);
+      sunday.setDate(d.getDate() - dayOfWeek);
+
+      const saturday = new Date(sunday);
+      saturday.setDate(sunday.getDate() + 6);
+
+      const options = { month: 'short', day: 'numeric' };
+      const startFmt = sunday.toLocaleDateString('en-US', options);
+      const endFmt = saturday.toLocaleDateString('en-US', options);
+
+      return {
+        label: `${startFmt} – ${endFmt}`,
+        key: sunday.toISOString().split('T')[0] // Use Sunday's date as week key
+      };
+    }
+
+    let currentWeekInfo = getWeekRangeKey(selectedDate);
+    document.getElementById('weekDisplay').innerText = currentWeekInfo.label;
+    document.getElementById('hiddenDatePicker').value = selectedDate;
+
+    function onDateSelected(val) {
+      if (!val) return;
+      selectedDate = val;
+      localStorage.setItem('planner_selected_date', selectedDate);
+      currentWeekInfo = getWeekRangeKey(selectedDate);
+      document.getElementById('weekDisplay').innerText = currentWeekInfo.label;
       renderAll();
     }
 
@@ -319,7 +364,8 @@
       const container = document.getElementById('habitsContainer');
       container.innerHTML = '';
       
-      if (!habitData[currentWeek]) habitData[currentWeek] = {};
+      const weekKey = currentWeekInfo.key;
+      if (!habitData[weekKey]) habitData[weekKey] = {};
 
       customHabits.forEach((habit) => {
         const row = document.createElement('div');
@@ -327,7 +373,7 @@
         
         let daysHtml = '';
         days.forEach((day, dIdx) => {
-          const active = habitData[currentWeek][`${habit}-${dIdx}`] ? 'active' : '';
+          const active = habitData[weekKey][`${habit}-${dIdx}`] ? 'active' : '';
           daysHtml += `<div class="day-btn ${active}" onclick="toggleHabit('${habit}', ${dIdx})">${day}</div>`;
         });
 
@@ -343,8 +389,9 @@
     }
 
     function toggleHabit(habit, dayIndex) {
+      const weekKey = currentWeekInfo.key;
       const key = `${habit}-${dayIndex}`;
-      habitData[currentWeek][key] = !habitData[currentWeek][key];
+      habitData[weekKey][key] = !habitData[weekKey][key];
       localStorage.setItem('habit_tracker_history', JSON.stringify(habitData));
       renderHabits();
       renderReport();
@@ -354,7 +401,8 @@
       const container = document.getElementById('studyContainer');
       container.innerHTML = '';
 
-      if (!studyData[currentWeek]) studyData[currentWeek] = {};
+      const weekKey = currentWeekInfo.key;
+      if (!studyData[weekKey]) studyData[weekKey] = {};
 
       defaultStudy.forEach((subject) => {
         const row = document.createElement('div');
@@ -362,7 +410,7 @@
         
         let daysHtml = '';
         days.forEach((day, dIdx) => {
-          const active = studyData[currentWeek][`study-${subject}-${dIdx}`] ? 'active' : '';
+          const active = studyData[weekKey][`study-${subject}-${dIdx}`] ? 'active' : '';
           daysHtml += `<div class="day-btn ${active}" onclick="toggleStudy('${subject}', ${dIdx})">${day}</div>`;
         });
 
@@ -372,8 +420,9 @@
     }
 
     function toggleStudy(subject, dayIndex) {
+      const weekKey = currentWeekInfo.key;
       const key = `study-${subject}-${dayIndex}`;
-      studyData[currentWeek][key] = !studyData[currentWeek][key];
+      studyData[weekKey][key] = !studyData[weekKey][key];
       localStorage.setItem('study_tracker_history', JSON.stringify(studyData));
       renderStudy();
     }
@@ -382,8 +431,9 @@
       const container = document.getElementById('reportContainer');
       container.innerHTML = '';
 
+      const weekKey = currentWeekInfo.key;
       const weekKeys = Object.keys(habitData).sort();
-      const currIdx = weekKeys.indexOf(currentWeek);
+      const currIdx = weekKeys.indexOf(weekKey);
       const prevWeekKey = currIdx > 0 ? weekKeys[currIdx - 1] : null;
 
       customHabits.forEach((habit) => {
@@ -391,7 +441,7 @@
         let prevCount = 0;
 
         for (let i = 0; i < 7; i++) {
-          if (habitData[currentWeek] && habitData[currentWeek][`${habit}-${i}`]) currCount++;
+          if (habitData[weekKey] && habitData[weekKey][`${habit}-${i}`]) currCount++;
           if (prevWeekKey && habitData[prevWeekKey] && habitData[prevWeekKey][`${habit}-${i}`]) prevCount++;
         }
 
