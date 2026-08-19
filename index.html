@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Custom Habit & Chores Planner</title>
+  <title>Chores & Habits Planner</title>
+  
+  <!-- Web App Manifest Link -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#3b82f6">
+
   <style>
     :root {
       --bg: #0f172a;
@@ -28,7 +33,7 @@
     .section { background: var(--card); border-radius: 10px; padding: 10px; margin-bottom: 12px; border: 1px solid var(--border); }
     .section-title { font-size: 0.9rem; font-weight: bold; margin-bottom: 8px; color: var(--accent-green); border-bottom: 1px solid var(--border); padding-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
 
-    /* Input Bar */
+    /* Input Controls */
     .task-input { display: flex; gap: 6px; margin-bottom: 10px; }
     input[type="text"] { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: #0f172a; color: white; font-size: 0.8rem; }
     button.add-btn { padding: 8px 12px; border-radius: 6px; border: none; background: var(--accent); color: white; font-weight: bold; cursor: pointer; }
@@ -40,7 +45,7 @@
     .day-btn { width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border); background: #0f172a; color: var(--muted); font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     .day-btn.active { background: var(--accent); color: white; border-color: var(--accent); font-weight: bold; }
 
-    /* List Sections */
+    /* List Item Styles */
     .item-list { display: flex; flex-direction: column; gap: 6px; }
     .item { display: flex; align-items: center; justify-content: space-between; background: #0f172a; padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; }
     .item.completed { text-decoration: line-through; color: var(--muted); }
@@ -68,7 +73,6 @@
   <div class="section">
     <div class="section-title">⚡ Non-negotiable habits</div>
     
-    <!-- Add Habit Input -->
     <div class="task-input">
       <input type="text" id="habitInput" placeholder="Add custom habit...">
       <button class="add-btn" onclick="addHabit()">Add Habit</button>
@@ -109,10 +113,7 @@
     const defaultStudy = ["GRE", "English", "Turkish", "Arabic", "Dari / Pashto"];
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
-    // Load custom habit list from local storage or set defaults
     let customHabits = JSON.parse(localStorage.getItem('planner_custom_habits')) || defaultInitialHabits;
-
-    // Local Storage keys for dates
     let currentWeek = localStorage.getItem('planner_current_week') || new Date().toISOString().split('T')[0];
     document.getElementById('weekDate').value = currentWeek;
 
@@ -294,4 +295,3 @@
   </script>
 </body>
 </html>
- 
