@@ -300,10 +300,23 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 6px 10px;
+      padding: 8px 10px;
       background: var(--bg);
       border-radius: 8px;
       font-size: 0.85rem;
+      cursor: grab;
+      border: 1px solid var(--card-border);
+      user-select: none;
+    }
+    .manage-item.dragging {
+      opacity: 0.4;
+      border: 1px dashed var(--accent-black);
+    }
+    .drag-handle {
+      font-weight: bold;
+      color: var(--text-muted);
+      margin-right: 8px;
+      cursor: grab;
     }
 
     .del-btn { 
@@ -319,24 +332,24 @@
 <body>
 
   <header>
-    <h1>📋 My Daily Planner</h1>
+    <h1>Daily Planner</h1>
     <div class="date-nav">
-      <button class="arrow-btn" onclick="navigateWeek(-7)">‹</button>
-      <span class="week-display" id="weekDisplay" onclick="document.getElementById('hiddenDatePicker').showPicker()">Aug 16 – Aug 22</span>
-      <button class="arrow-btn" onclick="navigateWeek(7)">›</button>
+      <button class="arrow-btn" onclick="navigateWeek(-7)">&lsaquo;</button>
+      <span class="week-display" id="weekDisplay" onclick="document.getElementById('hiddenDatePicker').showPicker()">Aug 16 &ndash; Aug 22</span>
+      <button class="arrow-btn" onclick="navigateWeek(7)">&rsaquo;</button>
       <input type="date" id="hiddenDatePicker" class="date-picker-hidden" onchange="onDateSelected(this.value)">
     </div>
   </header>
 
   <div class="view-toggle">
-    <button class="toggle-btn active" id="btnViewAll" onclick="setViewMode('all')">📅 Full Week</button>
-    <button class="toggle-btn" id="btnViewToday" onclick="setViewMode('today')">🎯 Today Only</button>
+    <button class="toggle-btn active" id="btnViewAll" onclick="setViewMode('all')">Full Week</button>
+    <button class="toggle-btn" id="btnViewToday" onclick="setViewMode('today')">Today Only</button>
   </div>
 
   <!-- NON-NEGOTIABLE HABITS TRACKER -->
   <div class="section">
     <div class="section-title">
-      <span>⚡ Non-negotiable habits</span>
+      <span>Non-negotiable Habits</span>
     </div>
     
     <div class="progress-container">
@@ -349,23 +362,31 @@
 
   <!-- WEEKLY STUDY PLAN TRACKER -->
   <div class="section">
-    <div class="section-title">📚 Weekly Study Plan</div>
+    <div class="section-title">
+      <span>Weekly Study Plan</span>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="studyProgressBar"></div></div>
+      <div class="progress-text" id="studyProgressText">0% Completed</div>
+    </div>
+
     <div id="studyContainer"></div>
   </div>
 
   <!-- GOALS & TASKS -->
   <div class="section">
     <div class="section-title">
-      <span>🎯 Goals for the Week</span>
+      <span>Goals for the Week</span>
     </div>
     <div class="item-list" id="goalsList"></div>
   </div>
 
   <footer>
-    <button class="footer-btn" onclick="openModal()">⚙️ Add / Manage Items</button>
+    <button class="footer-btn" onclick="openModal()">Add / Manage Items</button>
     <br><br>
-    <button class="footer-btn" style="font-size:0.7rem;" onclick="exportData()">📥 Backup</button>
-    <button class="footer-btn" style="font-size:0.7rem;" onclick="document.getElementById('importFile').click()">📤 Restore</button>
+    <button class="footer-btn" style="font-size:0.7rem;" onclick="exportData()">Backup</button>
+    <button class="footer-btn" style="font-size:0.7rem;" onclick="document.getElementById('importFile').click()">Restore</button>
     <input type="file" id="importFile" style="display:none" onchange="importData(event)">
   </footer>
 
@@ -373,8 +394,8 @@
   <div class="modal-overlay" id="optionsModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>⚙️ Manage Items</h3>
-        <button class="modal-close" onclick="closeModal()">✕</button>
+        <h3>Manage Items</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
       </div>
 
       <!-- Add Habits Section -->
@@ -385,6 +406,18 @@
           <button class="add-btn" onclick="addHabit()">Add</button>
         </div>
         <div class="manage-list" id="manageHabitsList"></div>
+      </div>
+
+      <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--card-border);">
+
+      <!-- Add Study Section -->
+      <div class="modal-section">
+        <div class="modal-section-title">ADD NEW STUDY PLAN</div>
+        <div class="task-input">
+          <input type="text" id="studyInput" placeholder="New study subject...">
+          <button class="add-btn" onclick="addStudySubject()">Add</button>
+        </div>
+        <div class="manage-list" id="manageStudyList"></div>
       </div>
 
       <hr style="margin: 16px 0; border: none; border-top: 1px solid var(--card-border);">
@@ -408,10 +441,11 @@
       "Walking", "Ghad al basar", "Learn Something new"
     ];
 
-    const defaultStudy = ["GRE", "English", "Turkish", "Arabic", "Dari / Pashto"];
+    const defaultInitialStudy = ["GRE", "English", "Turkish", "Arabic", "Dari / Pashto"];
     const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
     let customHabits = JSON.parse(localStorage.getItem('planner_custom_habits')) || defaultInitialHabits;
+    let customStudy = JSON.parse(localStorage.getItem('planner_custom_study')) || defaultInitialStudy;
     let selectedDate = localStorage.getItem('planner_selected_date') || new Date().toISOString().split('T')[0];
     let viewMode = 'all';
 
@@ -495,6 +529,27 @@
       }
     }
 
+    function addStudySubject() {
+      const inp = document.getElementById('studyInput');
+      const val = inp.value.trim();
+      if (val && !customStudy.includes(val)) {
+        customStudy.push(val);
+        localStorage.setItem('planner_custom_study', JSON.stringify(customStudy));
+        inp.value = '';
+        renderAll();
+        renderModalLists();
+      }
+    }
+
+    function deleteStudySubject(subject) {
+      if (confirm(`Delete "${subject}" study plan?`)) {
+        customStudy = customStudy.filter(s => s !== subject);
+        localStorage.setItem('planner_custom_study', JSON.stringify(customStudy));
+        renderAll();
+        renderModalLists();
+      }
+    }
+
     function addGoal() {
       const inp = document.getElementById('goalInput');
       if (inp.value.trim()) {
@@ -516,21 +571,101 @@
     function renderModalLists() {
       const hList = document.getElementById('manageHabitsList');
       hList.innerHTML = '';
-      customHabits.forEach((h) => {
+      customHabits.forEach((h, i) => {
         const item = document.createElement('div');
         item.className = 'manage-item';
-        item.innerHTML = `<span>${h}</span><button class="del-btn" onclick="deleteHabit('${h}')">✕</button>`;
+        item.draggable = true;
+        item.dataset.index = i;
+        item.dataset.type = 'habit';
+        item.innerHTML = `<div><span class="drag-handle">&equiv;</span><span>${h}</span></div><button class="del-btn" onclick="deleteHabit('${h}')">&times;</button>`;
         hList.appendChild(item);
       });
+      setupDragEvents(hList, 'habit');
+
+      const sList = document.getElementById('manageStudyList');
+      sList.innerHTML = '';
+      customStudy.forEach((s, i) => {
+        const item = document.createElement('div');
+        item.className = 'manage-item';
+        item.draggable = true;
+        item.dataset.index = i;
+        item.dataset.type = 'study';
+        item.innerHTML = `<div><span class="drag-handle">&equiv;</span><span>${s}</span></div><button class="del-btn" onclick="deleteStudySubject('${s}')">&times;</button>`;
+        sList.appendChild(item);
+      });
+      setupDragEvents(sList, 'study');
 
       const gList = document.getElementById('manageGoalsList');
       gList.innerHTML = '';
       goals.forEach((g, i) => {
         const item = document.createElement('div');
         item.className = 'manage-item';
-        item.innerHTML = `<span>${g.text}</span><button class="del-btn" onclick="deleteGoal(${i})">✕</button>`;
+        item.draggable = true;
+        item.dataset.index = i;
+        item.dataset.type = 'goal';
+        item.innerHTML = `<div><span class="drag-handle">&equiv;</span><span>${g.text}</span></div><button class="del-btn" onclick="deleteGoal(${i})">&times;</button>`;
         gList.appendChild(item);
       });
+      setupDragEvents(gList, 'goal');
+    }
+
+    function setupDragEvents(container, type) {
+      let draggedItem = null;
+
+      container.querySelectorAll('.manage-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+          draggedItem = item;
+          item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          draggedItem = null;
+          saveReorderedList(container, type);
+        });
+      });
+
+      container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const afterElement = getDragAfterElement(container, e.clientY);
+        if (afterElement == null) {
+          container.appendChild(draggedItem);
+        } else {
+          container.insertBefore(draggedItem, afterElement);
+        }
+      });
+    }
+
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.manage-item:not(.dragging)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    function saveReorderedList(container, type) {
+      const items = [...container.querySelectorAll('.manage-item')];
+      if (type === 'habit') {
+        const newOrder = items.map(el => customHabits[parseInt(el.dataset.index)]);
+        customHabits = newOrder;
+        localStorage.setItem('planner_custom_habits', JSON.stringify(customHabits));
+      } else if (type === 'study') {
+        const newOrder = items.map(el => customStudy[parseInt(el.dataset.index)]);
+        customStudy = newOrder;
+        localStorage.setItem('planner_custom_study', JSON.stringify(customStudy));
+      } else if (type === 'goal') {
+        const newOrder = items.map(el => goals[parseInt(el.dataset.index)]);
+        goals = newOrder;
+        localStorage.setItem('planner_goals', JSON.stringify(goals));
+      }
+      renderModalLists();
+      renderAll();
     }
 
     function getPerformanceBadge(habit) {
@@ -548,9 +683,9 @@
       }
 
       if (!prevWeekKey) return `<span class="badge-icon same">${currCount}/7</span>`;
-      if (currCount > prevCount) return `<span class="badge-icon better">▲ +${currCount - prevCount}</span>`;
-      if (currCount < prevCount) return `<span class="badge-icon worse">▼ ${currCount - prevCount}</span>`;
-      return `<span class="badge-icon same">▶ ${currCount}/7</span>`;
+      if (currCount > prevCount) return `<span class="badge-icon better">&Delta; +${currCount - prevCount}</span>`;
+      if (currCount < prevCount) return `<span class="badge-icon worse">&nabla; ${currCount - prevCount}</span>`;
+      return `<span class="badge-icon same">${currCount}/7</span>`;
     }
 
     function renderHabits() {
@@ -576,7 +711,7 @@
           if (viewMode === 'all') {
             daysHtml += `<div class="day-btn ${active}" onclick="toggleHabit('${habit}', ${dIdx})">${day}</div>`;
           } else if (dIdx === todayIdx) {
-            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleHabit('${habit}', ${dIdx})">${active ? '✓ Done' : 'Check In'}</div>`;
+            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleHabit('${habit}', ${dIdx})">${active ? 'Done' : 'Check In'}</div>`;
           }
         });
 
@@ -613,24 +748,32 @@
       if (!studyData[weekKey]) studyData[weekKey] = {};
       const todayIdx = new Date().getDay();
 
-      defaultStudy.forEach((subject) => {
+      let totalPossible = customStudy.length * 7;
+      let totalCompleted = 0;
+
+      customStudy.forEach((subject) => {
         const row = document.createElement('div');
         row.className = 'habit-row';
         
         let daysHtml = '';
         days.forEach((day, dIdx) => {
           const active = studyData[weekKey][`study-${subject}-${dIdx}`] ? 'active' : '';
+          if (active) totalCompleted++;
           
           if (viewMode === 'all') {
             daysHtml += `<div class="day-btn ${active}" onclick="toggleStudy('${subject}', ${dIdx})">${day}</div>`;
           } else if (dIdx === todayIdx) {
-            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleStudy('${subject}', ${dIdx})">${active ? '✓ Done' : 'Check In'}</div>`;
+            daysHtml = `<div class="single-day-target ${active ? 'active' : ''}" onclick="toggleStudy('${subject}', ${dIdx})">${active ? 'Done' : 'Check In'}</div>`;
           }
         });
 
         row.innerHTML = `<span>${subject}</span><div class="days-grid">${daysHtml}</div>`;
         container.appendChild(row);
       });
+
+      const pct = totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
+      document.getElementById('studyProgressBar').style.width = `${pct}%`;
+      document.getElementById('studyProgressText').innerText = `${pct}% Weekly Completion`;
     }
 
     function toggleStudy(subject, dayIndex) {
@@ -664,7 +807,7 @@
     }
 
     function exportData() {
-      const backup = { customHabits, habitData, studyData, goals };
+      const backup = { customHabits, customStudy, habitData, studyData, goals };
       const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
@@ -680,6 +823,7 @@
         try {
           const data = JSON.parse(evt.target.result);
           if (data.customHabits) localStorage.setItem('planner_custom_habits', JSON.stringify(data.customHabits));
+          if (data.customStudy) localStorage.setItem('planner_custom_study', JSON.stringify(data.customStudy));
           if (data.habitData) localStorage.setItem('habit_tracker_history', JSON.stringify(data.habitData));
           if (data.studyData) localStorage.setItem('study_tracker_history', JSON.stringify(data.studyData));
           if (data.goals) localStorage.setItem('planner_goals', JSON.stringify(data.goals));
