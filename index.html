@@ -16,7 +16,6 @@
       --text-main: #111111;
       --text-muted: #666666;
       --accent-black: #000000;
-      --accent-black-hover: #222222;
       --accent-green: #2e7d32;
       --accent-green-bg: #e8f5e9;
       --accent-red: #c62828;
@@ -140,7 +139,7 @@
     .progress-bar-fill { background: var(--accent-black); height: 100%; width: 0%; transition: width 0.3s ease; }
     .progress-text { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-align: right; margin-top: 4px; }
 
-    /* Tracker Rows */
+    /* Tracker Rows & Inline Performance Indicators */
     .habit-row { 
       display: flex; 
       align-items: center; 
@@ -151,7 +150,7 @@
       font-weight: 500;
     }
     .habit-row:last-child { border-bottom: none; }
-    .habit-label-box { display: flex; align-items: center; gap: 8px; }
+    .habit-label-box { display: flex; align-items: center; gap: 6px; }
     .days-grid { display: flex; gap: 5px; }
     
     .day-btn { 
@@ -173,6 +172,18 @@
       color: white; 
       border-color: var(--accent-black); 
     }
+
+    .badge-icon {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .badge-icon.better { background: var(--accent-green-bg); color: var(--accent-green); }
+    .badge-icon.worse { background: var(--accent-red-bg); color: var(--accent-red); }
+    .badge-icon.same { background: var(--day-inactive); color: var(--text-muted); }
 
     /* Single Day Mode Target */
     .single-day-target {
@@ -201,33 +212,6 @@
       border: 1px solid var(--card-border);
     }
     .item.completed { text-decoration: line-through; color: var(--text-muted); opacity: 0.7; }
-
-    /* Performance Report */
-    .report-card { 
-      background: var(--bg); 
-      padding: 10px 14px; 
-      border-radius: 10px; 
-      margin-bottom: 8px; 
-      font-size: 0.85rem; 
-      font-weight: 500;
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      border: 1px solid var(--card-border);
-    }
-
-    .badge { 
-      font-weight: 700; 
-      padding: 4px 8px; 
-      border-radius: 8px; 
-      font-size: 0.75rem; 
-      display: flex; 
-      align-items: center; 
-      gap: 4px; 
-    }
-    .badge.better { background: var(--accent-green-bg); color: var(--accent-green); }
-    .badge.worse { background: var(--accent-red-bg); color: var(--accent-red); }
-    .badge.same { background: var(--day-inactive); color: var(--text-muted); }
 
     /* Footer & Hidden Options Modal */
     footer { text-align: center; margin-top: 20px; padding-bottom: 20px; }
@@ -367,12 +351,6 @@
   <div class="section">
     <div class="section-title">📚 Weekly Study Plan</div>
     <div id="studyContainer"></div>
-  </div>
-
-  <!-- PERFORMANCE REPORT -->
-  <div class="section">
-    <div class="section-title">📊 Weekly Performance Report</div>
-    <div id="reportContainer"></div>
   </div>
 
   <!-- GOALS & TASKS -->
@@ -555,6 +533,26 @@
       });
     }
 
+    function getPerformanceBadge(habit) {
+      const weekKey = currentWeekInfo.key;
+      const weekKeys = Object.keys(habitData).sort();
+      const currIdx = weekKeys.indexOf(weekKey);
+      const prevWeekKey = currIdx > 0 ? weekKeys[currIdx - 1] : null;
+
+      let currCount = 0;
+      let prevCount = 0;
+
+      for (let i = 0; i < 7; i++) {
+        if (habitData[weekKey] && habitData[weekKey][`${habit}-${i}`]) currCount++;
+        if (prevWeekKey && habitData[prevWeekKey] && habitData[prevWeekKey][`${habit}-${i}`]) prevCount++;
+      }
+
+      if (!prevWeekKey) return `<span class="badge-icon same">${currCount}/7</span>`;
+      if (currCount > prevCount) return `<span class="badge-icon better">▲ +${currCount - prevCount}</span>`;
+      if (currCount < prevCount) return `<span class="badge-icon worse">▼ ${currCount - prevCount}</span>`;
+      return `<span class="badge-icon same">▶ ${currCount}/7</span>`;
+    }
+
     function renderHabits() {
       const container = document.getElementById('habitsContainer');
       container.innerHTML = '';
@@ -582,7 +580,15 @@
           }
         });
 
-        row.innerHTML = `<span>${habit}</span><div class="days-grid">${daysHtml}</div>`;
+        const badgeHtml = getPerformanceBadge(habit);
+
+        row.innerHTML = `
+          <div class="habit-label-box">
+            <span>${habit}</span>
+            ${badgeHtml}
+          </div>
+          <div class="days-grid">${daysHtml}</div>
+        `;
         container.appendChild(row);
       });
 
@@ -597,7 +603,6 @@
       habitData[weekKey][key] = !habitData[weekKey][key];
       localStorage.setItem('habit_tracker_history', JSON.stringify(habitData));
       renderHabits();
-      renderReport();
     }
 
     function renderStudy() {
@@ -634,42 +639,6 @@
       studyData[weekKey][key] = !studyData[weekKey][key];
       localStorage.setItem('study_tracker_history', JSON.stringify(studyData));
       renderStudy();
-    }
-
-    function renderReport() {
-      const container = document.getElementById('reportContainer');
-      container.innerHTML = '';
-
-      const weekKey = currentWeekInfo.key;
-      const weekKeys = Object.keys(habitData).sort();
-      const currIdx = weekKeys.indexOf(weekKey);
-      const prevWeekKey = currIdx > 0 ? weekKeys[currIdx - 1] : null;
-
-      customHabits.forEach((habit) => {
-        let currCount = 0;
-        let prevCount = 0;
-
-        for (let i = 0; i < 7; i++) {
-          if (habitData[weekKey] && habitData[weekKey][`${habit}-${i}`]) currCount++;
-          if (prevWeekKey && habitData[prevWeekKey] && habitData[prevWeekKey][`${habit}-${i}`]) prevCount++;
-        }
-
-        let badgeHtml = '';
-        if (!prevWeekKey) {
-          badgeHtml = `<span class="badge same">${currCount}/7 Days</span>`;
-        } else if (currCount > prevCount) {
-          badgeHtml = `<span class="badge better">▲ Better (+${currCount - prevCount})</span>`;
-        } else if (currCount < prevCount) {
-          badgeHtml = `<span class="badge worse">▼ Worse (${currCount - prevCount})</span>`;
-        } else {
-          badgeHtml = `<span class="badge same">▶ Same (${currCount}/7)</span>`;
-        }
-
-        const card = document.createElement('div');
-        card.className = 'report-card';
-        card.innerHTML = `<span>${habit}</span>${badgeHtml}`;
-        container.appendChild(card);
-      });
     }
 
     function renderGoals() {
@@ -725,7 +694,6 @@
     function renderAll() {
       renderHabits();
       renderStudy();
-      renderReport();
       renderGoals();
     }
 
